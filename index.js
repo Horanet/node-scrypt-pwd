@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 // Default options
-let defaultOptions = {
+const defaultOptions = {
   hashlength: 32,
   saltlength: 16,
   pepper: '',
@@ -11,6 +11,8 @@ let defaultOptions = {
   maxmem: 64 * 1024 * 1024, // Maximum memory in bytes (64 MB by default)
   permissive: false,
 };
+
+let currentOptions = { ...defaultOptions };
 
 // Helper function to normalize options
 function normalize(options = {}) {
@@ -22,26 +24,34 @@ function normalize(options = {}) {
   };
 
   for (const opt in shorthand) {
-    if (opts[shorthand[opt]]) {
+    if (shorthand[opt] in opts) {
       opts[opt] = opts[shorthand[opt]];
       delete opts[shorthand[opt]];
+    }
+  }
+
+  for (const opt in opts) {
+    if (opts[opt] === undefined) {
+      opts[opt] = defaultOptions[opt];
     }
   }
   return opts;
 }
 
 function getOptions(options = {}) {
-  return { ...defaultOptions, ...normalize(options) };
+  return { ...currentOptions, ...normalize(options) };
 }
 
-// Init function to set default options
-function init(options = {}) {
-  defaultOptions = getOptions(options);
+function opts(options) {
+  if (options) {
+    currentOptions = getOptions(options);
+  }
+  return currentOptions;
 }
 
 // Hash function: Generates a hash from the password
 async function hash(password, options = {}) {
-  const combinedOptions = getOptions(options);;
+  const combinedOptions = getOptions(options);
   
   const salt = crypto.randomBytes(combinedOptions.saltlength);
   const fullPassword = password + combinedOptions.pepper;
@@ -140,5 +150,5 @@ async function verify(password, hash, options = {}) {
   }
 }
 
-module.exports = { init, hash, parse, verify, looksGood, getOptions };
+module.exports = { opts, hash, verify, looksGood, parse };
 
