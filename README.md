@@ -53,8 +53,10 @@ await verify(password, hash4); // true
 
 This module exposes the following functions:
 
-`init(options)`
-* parameters:
+### `init(options)`
+Set the default values for scrypt options
+
+parameters:
   * `options` (JSON object): may contain
     * `hashlength` (int, default 32): hash length in bytes
     * `saltlength` (int, default 16): salt length in bytes
@@ -62,23 +64,36 @@ This module exposes the following functions:
     * any `crypto.scrypt()`option : `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`, `maxmem`
     * `permissive` (boolean, default false): use these parameters (`hashlength`, `saltlength`, `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`) to hash passwords, but may validate passwords hashed with other parameters
 
-`hash(password [, options])` returns a hash password with its salt
-* parameters:
+### `hash(password [, options])`
+
+computes a salted hashed password
+
+parameters:
   * `password` (string)
   * `options` (JSON object): to override any init option
-* returns: a string formatted as `<base64(hash)>$<base64(salt)>$<cost>$<blockSize>$<parallelization>`
 
-`verify(password, hash [, options])`: check that a password matches with a salted hash
-* parameters:
+returns: a string formatted as `<base64(hash)>$<base64(salt)>$<cost>$<blockSize>$<parallelization>`
+
+### `verify(password, hash [, options])`
+
+checks if a password matches with a salted hash
+
+parameters:
   * `password` (string)
   * `hash` (string): the salted hash as returned by `hash`
   * `options` (JSON object): to override any init options
-* returns: a boolean, false if the password does not match the hash or if the hash is in a wrong format
 
-`looksGood(hash [, options])`: check if a salted hash is compliant to the format returned by `hash()`
-* parameters:
+
+returns: a boolean, false if the password does not match the hash or if the hash is in a wrong format
+
+### `looksGood(hash [, options])`
+
+checks if a salted hash is compliant to the format returned by `hash()`
+
+parameters:
   * `hash` (string): the salted hash to check
   * `options`: to override any init option 
-* returns: a boolean, `true` if the hash seems to be compliant, `false` if it is not,  
+
+returns: a boolean, `true` if the hash seems to be compliant, `false` if it is not,  
 if `permissive` is set to `false`, the value of parameters `hashlength`, `saltlength`, `cost`|`N`, `blockSize`|`r`, `parallelization`|`p` is checked
 
