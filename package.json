@@ -1,0 +1,23 @@
+{
+  "name": "scrypt-utils",
+  "version": "1.0.0",
+  "description": "Utilities for hashing passwords with scrypt in Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "scrypt",
+    "password",
+    "hashing",
+    "crypto",
+    "node"
+  ],
+  "author": "fxdeltombe (https://github.com/fxdeltombe)",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "assert": "^2.0.0"
+  }
+}
+

@@ -12,16 +12,23 @@ const defaultOptions = {
   permissive: false,
 };
 
+const shorthand = {
+  cost: 'N', // CPU/memory cost
+  blockSize: 'r', // Block size
+  parallelization: 'p', // Parallelization
+};
+
 let currentOptions = { ...defaultOptions };
 
-// Helper function to normalize options
+/**
+ * Normalize the options, allowing shorthand values ('N', 'r', 'p')
+ * and merging with default options.
+ *
+ * @param {Object} [options={}] - The options to normalize.
+ * @returns {Object} - The normalized options merged with defaults.
+ */
 function normalize(options = {}) {
   const opts = {...options};
-  const shorthand = {
-    cost: 'N', // CPU/memory cost
-    blockSize: 'r', // Block size
-    parallelization: 'p', // Parallelization
-  };
 
   for (const opt in shorthand) {
     if (shorthand[opt] in opts) {
@@ -38,10 +45,22 @@ function normalize(options = {}) {
   return opts;
 }
 
+/**
+ * Get options by combining default options and user-provided ones.
+ *
+ * @param {Object} [options={}] - The user-provided options.
+ * @returns {Object} - The combined options.
+ */
 function getOptions(options = {}) {
   return { ...currentOptions, ...normalize(options) };
 }
 
+/**
+ * Complement or get the current options.
+ *
+ * @param {Object} [options] - The new options to set.
+ * @returns {Object} - The current options.
+ */
 function opts(options) {
   if (options) {
     currentOptions = getOptions(options);
@@ -49,7 +68,14 @@ function opts(options) {
   return currentOptions;
 }
 
-// Hash function: Generates a hash from the password
+/**
+ * Hash a password using scrypt with a random salt.
+ *
+ * @param {string} password - The password to hash.
+ * @param {Object} [options={}] - Options to override defaults.
+ * @returns {Promise<string>} - The hashed password in format:
+ * `<base64(hash)>$<base64(salt)>$<cost>$<blockSize>$<parallelization>`.
+ */
 async function hash(password, options = {}) {
   const combinedOptions = getOptions(options);
   
@@ -64,6 +90,14 @@ async function hash(password, options = {}) {
   });
 }
 
+/**
+ * Parse a hashed password string into its components.
+ *
+ * @param {string} hash - The hashed password.
+ * @param {Object} [options={}] - Options to override defaults.
+ * @returns {Object} - An object with `hashedPassword`, `salt`, `cost`, `blockSize`, and `parallelization`.
+ * @throws Will throw an error if the hash format is invalid.
+ */
 function parse(hash, options) {
   const combinedOptions = getOptions(options);
   const parts = hash.split('$');
@@ -115,6 +149,13 @@ function parse(hash, options) {
   return parsedHash;
 }
 
+/**
+ * Check if a hash has the correct format and parameters.
+ *
+ * @param {string} hash - The hashed password.
+ * @param {Object} [options={}] - Options to override defaults.
+ * @returns {boolean} - Returns `true` if the hash looks valid, otherwise `false`.
+ */
 function looksGood(hash, options = {}) {
   try {
     parse(hash, options);
@@ -124,7 +165,14 @@ function looksGood(hash, options = {}) {
   }
 }
 
-// Verify function: Checks if a given password matches a stored hash
+/**
+ * Verify if a password matches a given hash.
+ *
+ * @param {string} password - The password to verify.
+ * @param {string} hash - The hash to compare with.
+ * @param {Object} [options={}] - Options to override defaults.
+ * @returns {Promise<boolean>} - Returns `true` if the password matches the hash, otherwise `false`.
+ */
 async function verify(password, hash, options = {}) {
   const combinedOptions = getOptions(options);
 
