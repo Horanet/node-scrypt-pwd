@@ -54,7 +54,7 @@ This module exposes the following functions:
 ### `opts([options])`
 Add or get scrypt options
 
-**parameters:**
+**Parameters:**
   * `options` (JSON object, optional): options to add, may contain
     * `hashlength` (int, default 32): hash length in bytes
     * `saltlength` (int, default 16): salt length in bytes
@@ -62,38 +62,38 @@ Add or get scrypt options
     * any `crypto.scrypt()`option : `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`, `maxmem`
     * `permissive` (boolean, default false): use these parameters (`hashlength`, `saltlength`, `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`) to hash passwords, but may validate passwords hashed with other parameters
 
-**returns:** an object containing the resulting scrypt options
+**Returns:** an object containing the resulting scrypt options
 
 ### `hash(password [, options])`
 
 computes a salted hashed password
 
-**parameters:**
+**Parameters:**
   * `password` (string)
   * `options` (JSON object): to override any init option
 
-**returns:** a string formatted as `<base64(hash)>$<base64(salt)>$<cost>$<blockSize>$<parallelization>`
+**Returns:** a string formatted as `<base64(hash)>$<base64(salt)>$<cost>$<blockSize>$<parallelization>`
 
 ### `verify(password, hash [, options])`
 
 checks if a password matches with a salted hash
 
-**parameters:**
+**Parameters:**
   * `password` (string)
   * `hash` (string): the salted hash as returned by `hash`
   * `options` (JSON object): to override any init options
 
-**returns:** a boolean, false if the password does not match the hash or if the hash is in a wrong format
+**Returns:** a boolean, false if the password does not match the hash or if the hash is in a wrong format
 
 ### `looksGood(hash [, options])`
 
 checks if a salted hash is compliant to the format returned by `hash()`
 
-**parameters:**
+**Parameters:**
   * `hash` (string): the salted hash to check
   * `options`: to override any init option 
 
-**returns:** a boolean, `true` if the hash seems to be compliant, `false` if it is not,  
+**Returns:** a boolean, `true` if the hash seems to be compliant, `false` if it is not,  
 if `permissive` is set to `false`, the value of parameters `hashlength`, `saltlength`, `cost`|`N`, `blockSize`|`r`, `parallelization`|`p` is checked
 
 ### `parse(hash, [options])`
