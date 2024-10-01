@@ -1,5 +1,5 @@
 {
-  "name": "scrypt-utils",
+  "name": "scrypt-password",
   "version": "1.0.0",
   "description": "Utilities for hashing passwords with scrypt in Node.js",
   "main": "index.js",
@@ -9,9 +9,12 @@
   "keywords": [
     "scrypt",
     "password",
+    "hash",
     "hashing",
-    "crypto",
-    "node"
+    "verify",
+    "verification",
+    "check",
+    "PHC"
   ],
   "author": "fxdeltombe (https://github.com/fxdeltombe)",
   "license": "MIT",
