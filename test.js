@@ -39,7 +39,7 @@ opts(options);
 
     // Test parse function
     const parsed = parse(hashedPassword);
-    assert.strictEqual(parsed.hashedPassword.length > 0, true, 'Hash should be parsed correctly');
+    assert.strictEqual(parsed.hash.length > 0, true, 'Hash should be parsed correctly');
     console.log('Hash parsed successfully:', parsed);
 
     console.log('All tests passed!');

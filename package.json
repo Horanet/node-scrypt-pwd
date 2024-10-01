@@ -15,9 +15,10 @@
   ],
   "author": "fxdeltombe (https://github.com/fxdeltombe)",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@phc/format": "^1.0.0"
+  },
   "devDependencies": {
     "assert": "^2.0.0"
   }
 }
-

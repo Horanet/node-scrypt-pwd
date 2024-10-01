@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const phc = require('@phc/format');
 
 // Default options
 const defaultOptions = {
@@ -85,7 +86,16 @@ async function hash(password, options = {}) {
   return new Promise((resolve, reject) => {
     crypto.scrypt(fullPassword, salt, combinedOptions.hashlength, combinedOptions, (err, derivedKey) => {
       if (err) reject(err);
-      resolve(`${derivedKey.toString('base64')}$${salt.toString('base64')}$${combinedOptions.cost}$${combinedOptions.blockSize}$${combinedOptions.parallelization}`);
+      resolve(phc.serialize({
+        id: 'scrypt',
+        hash: derivedKey,
+        salt: salt,
+        params: {
+          n: combinedOptions.cost,
+          r: combinedOptions.blockSize,
+          p: combinedOptions.parallelization
+        }
+      }));
     });
   });
 }
@@ -100,48 +110,20 @@ async function hash(password, options = {}) {
  */
 function parse(hash, options) {
   const combinedOptions = getOptions(options);
-  const parts = hash.split('$');
-  
-  if (parts.length !== 5) {
-    throw new Error('Invalid hash format');
-  }
-
-  const parsedHash = {
-    hashedPassword: parts[0],
-    salt: parts[1],
-    cost: parts[2],
-    blockSize: parts[3],
-    parallelization: parts[4],
-  }
-
-  // Check if the hashedPassword and salt are valid base64 strings
-  for (const param of ['hashedPassword', 'salt']) {
-    try {
-      parsedHash[param] = Buffer.from(parsedHash[param], 'base64');
-    } catch (e) {
-      throw new Error(`Invalid base64 encoding for ${param}`);
-    }
-  }
-
-  // Convert parameters to numbers and check if they are valid positive integers
-  for (const param of ['cost', 'blockSize', 'parallelization']) {
-    parsedHash[param] = parseInt(parsedHash[param]);
-    if (!(parsedHash[param] > 0)) {
-      throw new Error(`Invalid parameter ${param}`);
-    }
-  }
+  const parsedHash = phc.deserialize(hash);
+  parsedHash.params.N = parsedHash.params.n
 
   // Non-permissive checks
   if (!combinedOptions.permissive) {
-    if (parsedHash.hashedPassword.length !== combinedOptions.hashlength) {
+    if (parsedHash.hash.length !== combinedOptions.hashlength) {
       throw new Error('Hash length does not match');
     }
     if (parsedHash.salt.length !== combinedOptions.saltlength) {
       throw new Error('Salt length does not match');
     }
-    for (const param of ['cost', 'blockSize', 'parallelization']) {
-      if (parsedHash[param] !== combinedOptions[param]) {
-        throw new Error(`Parameter ${param} does not match`);
+    for (const param in shorthand) {
+      if (parsedHash.params[shorthand[param]] !== combinedOptions[param]) {
+        throw new Error(`Parameter ${param}/${shorthand[param]} does not match`);
       }
     }
   }
@@ -175,22 +157,20 @@ function looksGood(hash, options = {}) {
  */
 async function verify(password, hash, options = {}) {
   const combinedOptions = getOptions(options);
-
   try {
     const parsedHash = parse(hash, options);
     const fullPassword = password + combinedOptions.pepper;
+
     return new Promise((resolve, reject) => {
-      crypto.scrypt(fullPassword, parsedHash.salt, parsedHash.hashedPassword.length, {
-        cost: parsedHash.cost,
-        blockSize: parsedHash.blockSize,
-        parallelization: parsedHash.parallelization,
+      crypto.scrypt(fullPassword, parsedHash.salt, parsedHash.hash.length, {
+        ...parsedHash.params,
         maxmem: combinedOptions.maxmem
       }, (err, derivedKey) => {
         if (err) {
           reject(err);
           return;
         }
-        resolve(derivedKey.equals(parsedHash.hashedPassword));
+        resolve(derivedKey.equals(parsedHash.hash));
       });
     });
   } catch(err) {

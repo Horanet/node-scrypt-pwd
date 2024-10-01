@@ -17,8 +17,8 @@ const hash1 = await hash(password); // returns each time a different value, sinc
 await verify(password, hash1); // true
 await verify(password, 'badhash'); // false
 await verify('badsecret', hash1); // false
-await verify(password, 'NAiwS8ZCQibTx5ynog037kyq37vTUnnUx99MyjxZiNA=$23NP/wU8OMukXuroV4h6rg==$16384$8$1'); // true
-await verify(password, 'TAiwS8ZCQibTx5ynog037kyq37vTUnnUx99MyjxZiNA=$23NP/wU8OMukXuroV4h6rg==$16384$8$1'); // false, the hash has been tampered
+await verify(password, '$scrypt$n=16384,r=8,p=1$uCmebOheGtvRJlgxowQ0Uw$/hQO0hGE9owhDsxcNIuSqLY96uU58b9AsfSD4u59NBU'); // true
+await verify(password, '$scrypt$n=16384,r=8,p=1$uCmebOheGtvRJlgxowQ0Uw$/hQO0hGE9owhDsxcNIuSqLY96uU58b9AsfSD4u59NXX'); // false, the hash has been tampered
 
 // Setting some pepper
 const options = { pepper: 'pepper123' };
