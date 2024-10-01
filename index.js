@@ -10,7 +10,7 @@ const defaultOptions = {
   blockSize: 8, // Block size (r)
   parallelization: 1, // Parallelization (p)
   maxmem: 64 * 1024 * 1024, // Maximum memory in bytes (64 MB by default)
-  permissive: false,
+  strict: false,
 };
 
 const shorthand = {
@@ -113,8 +113,8 @@ function parse(hash, options) {
   const parsedHash = phc.deserialize(hash);
   parsedHash.params.N = parsedHash.params.n
 
-  // Non-permissive checks
-  if (!combinedOptions.permissive) {
+  // parameters checks
+  if (combinedOptions.strict) {
     if (parsedHash.hash.length !== combinedOptions.hashlength) {
       throw new Error('Hash length does not match');
     }
@@ -138,12 +138,12 @@ function parse(hash, options) {
  * @param {Object} [options={}] - Options to override defaults.
  * @returns {boolean} - Returns `true` if the hash looks valid, otherwise `false`.
  */
-function looksGood(hash, options = {}) {
+function needsRehash(hash, options = {}) {
   try {
-    parse(hash, options);
-    return true;
-  } catch(err) {
+    parse(hash, { ...options, strict: true });
     return false;
+  } catch(err) {
+    return true;
   }
 }
 
@@ -178,5 +178,5 @@ async function verify(password, hash, options = {}) {
   }
 }
 
-module.exports = { opts, hash, verify, looksGood, parse };
+module.exports = { opts, hash, verify, needsRehash, parse };
 
