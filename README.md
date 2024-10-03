@@ -1,18 +1,12 @@
 # scrypt-password
 A simple but powerful password hashing and verification library wrapping over the scrypt implementation available in the Node.js crypto module.
 
-## Introduction
-In Node.js projects, using `crypto.scrypt()` is a great alternative to bcrypt for hashing passwords, as bcrypt depends on many modules (introducing compatibility and security concerns), whereas the `crypto` library is native to JavaScript.
-
-The bcrypt module provides convenient functions to generate and check hashed passwords. This module aims to provide similar functionality using `crypto.scrypt()`.
-
-### Highlights
-* powerful: can apply any crypto.scrypt option, but default values are convenient, can also introduce pepper
-* works on any node version from xx
+## Main features
+* powerful: any crypto.scrypt option can be set, but default values are convenient, can also introduce pepper
 * password hash are PHC-formatted
 * only one dependency, @phc/format, which is quite light
 * option 'strict': if let to false, a password hash can be valid even if its parameters differ from current hashing parameters
-* function needsRehash: to determine if a password hash parameters differ from current hashing parameters, and thus the password should be re-hashed
+* function needsRehash: to determine if password hash parameters differ from current hashing parameters, and thus password should be re-hashed
 
 None of the similar libraries I could test was compliant with all these points.
 
@@ -82,7 +76,7 @@ computes a salted hashed password
   * `password` (string)
   * `options` (JSON object): to override any option
 
-**Returns:** a string formatted as `<base64(hash)>$<base64(salt)>$<cost>$<blockSize>$<parallelization>`
+**Returns:** a PHC-formatted string
 
 ### `verify(password, hash [, options])`
 
@@ -90,28 +84,27 @@ checks if a password matches with a salted hash
 
 **Parameters:**
   * `password` (string)
-  * `hash` (string): the salted hash as returned by `hash`
+  * `hash` (string): the PHC-formatted salted hash as returned by `hash`
   * `options` (JSON object): to override any options
 
 **Returns:** a boolean, false if the password does not match the hash or if the hash is in a wrong format
 
 ### `needsRehash(hash [, options])`
 
-checks if a salted hash is compliant to the format returned by `hash()`: if not, it should be re-hashed
+checks if a hash is compliant to the format returned by `hash()` toward scrypt options: if not, it should be re-hashed
 
 **Parameters:**
   * `hash` (string): the salted hash to check
-  * `options`: to override any option 
+  * `options` (JSON object): to override any option
 
-**Returns:** a boolean, `true` if the hash seems to be compliant, `false` if it is not,  
-if `strict` is set to `true`, the value of parameters `hashlength`, `saltlength`, `cost`|`N`, `blockSize`|`r`, `parallelization`|`p` is checked
+**Returns:** a boolean, `false` if the hash seems to be compliant, `true` if it needs to be re-hashed
 
 ### `parse(hash, [options])`
-Parses a salted hash and validates it against the current or provided options.
+Parses a salted hash and, if 'strict' option is set, checks if it is compliant with scrypt options.
 
 **Parameters:**
 * hash (string): The salted hash to parse.
-* options (JSON object): Optional object to override any option.
+* options (JSON object): to override any option.
 
 **Returns:** An object containing the following fields:
 * hashedPassword (Buffer): The base64-decoded hashed password.
@@ -121,5 +114,4 @@ Parses a salted hash and validates it against the current or provided options.
 * parallelization (int): The parallelization factor (p).
 
 Throws: An error if the hash format is invalid or the hash fails validation.
-
 
