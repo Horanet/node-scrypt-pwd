@@ -1,117 +1,121 @@
 # scrypt-password
-A simple but powerful password hashing and verification library wrapping over the scrypt implementation available in the Node.js crypto module.
 
-## Main features
-* powerful: any crypto.scrypt option can be set, but default values are convenient, can also introduce pepper
-* password hash are PHC-formatted
-* only one dependency, @phc/format, which is quite light
-* option 'strict': if let to false, a password hash can be valid even if its parameters differ from current hashing parameters
-* function needsRehash: to determine if password hash parameters differ from current hashing parameters, and thus password should be re-hashed
+`scrypt-password` is a simple yet powerful password hashing and verification library that wraps around the native `crypto.scrypt` implementation.
 
-None of the similar libraries I could test was compliant with all these points.
+## 🌟 Features
+
+- **Flexible Configuration**: Supports all `crypto.scrypt` options, allowing fine-tuned customization, yet default values are optimized for convenience.
+- **PHC-Formatted Hashes**: Password hashes follow the [Password Hashing Competition (PHC) format](https://github.com/P-H-C/phc-string-format/blob/master/phc-sf-spec.md)
+- **Lightweight Dependency**: Only one external dependency, `@phc/format`.
+- **Strict and Permissive Modes**: With the `strict` option, enforce consistent hashing parameters or allow some flexibility when verifying hashes.
+- **Rehash Detection**: Use `needsRehash` to identify if a password hash needs rehashing due to updated hashing parameters.
 
 ## Usage
-```
+```js
 const { opts, hash, verify, needsRehash, parse } = require('scrypt-password');
 
 const password = 'supersecret';
 
 // Basic operations
-const hash1 = await hash(password); // returns each time a different value, since salt is random
+const hash1 = await hash(password); // Generates a different value each time due to random salt
 await verify(password, hash1); // true
 await verify(password, 'badhash'); // false
 await verify('badsecret', hash1); // false
 await verify(password, '$scrypt$n=16384,r=8,p=1$uCmebOheGtvRJlgxowQ0Uw$/hQO0hGE9owhDsxcNIuSqLY96uU58b9AsfSD4u59NBU'); // true
-await verify(password, '$scrypt$n=16384,r=8,p=1$uCmebOheGtvRJlgxowQ0Uw$/hQO0hGE9owhDsxcNIuSqLY96uU58b9AsfSD4u59NXX'); // false, the hash has been tampered
+await verify(password, '$scrypt$n=16384,r=8,p=1$uCmebOheGtvRJlgxowQ0Uw$/hQO0hGE9owhDsxcNIuSqLY96uU58b9AsfSD4u59NXX'); // false, hash tampered
 
-// Setting some pepper
+// Setting a pepper for added security
 const options = { pepper: 'pepper123' };
 const hash2 = await hash(password, options);
 await verify(password, hash2, options); // true
-await verify(password, hash1, options); // false, since a pepper has been set
-needsRehash(hash1, options); // false: pepper does not appear in the hash, so the hash looks correct
+await verify(password, hash1, options); // false, different pepper used
+needsRehash(hash1, options); // false: Pepper is not included in the hash, so hash appears correct
 
-// Changing a `crypto.scrypt()` option such as `blockSize`
+// Changing `crypto.scrypt()` options, such as `blockSize`
 options.blockSize = 16;
 opts(options);
 const hash3 = await hash(password);
 await verify(password, hash3); // true
-await verify(password, hash2); // false, since blockSize in hash2 differ from expected value
-needsRehash(hash2); // true, since blockSize appears in the hash
-await verify(password, hash2, { strict: false }); // true: despite blockSize differ from expected values, the hash is valid
+await verify(password, hash2); // false, differing blockSize values
+needsRehash(hash2); // true, blockSize appears in hash, but is now different
+await verify(password, hash2, { strict: false }); // true, valid despite different blockSize
 needsRehash(hash2, { strict: false }); // false
-// note that options can be set persistantly with `opts`, or they can be passed in arguments
 
-// `crypto.scrypt()` options can also be set with shorthands
-options.r = undefined; // r is a synonym for blockSize, reset to default value
+// Shorthand for crypto.scrypt() options
+options.r = undefined; // Reset blockSize to default value
 opts(options);
 const hash4 = await hash(password);
 needsRehash(hash4); // false
 await verify(password, hash4); // true
-
 ```
 
-## APIs
-
-This module exposes the following functions:
-
+## API Reference
 ### `opts([options])`
-Add or get scrypt options
+Add or get scrypt options.  
+To reset an option to its default value, set it to `undefined`.
 
 **Parameters:**
-  * `options` (JSON object, optional): options to add, may contain
-    * `hashlength` (int, default 32): hash length in bytes
-    * `saltlength` (int, default 16): salt length in bytes
-    * `pepper` (string): to make it harder to retrieve a password from its hash and salt, default is empty string, meaning that no pepper is used
-    * any `crypto.scrypt()`option : `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`, `maxmem`
-    * `strict` (boolean, default false): if set to true, a hashed password verification fails if parameters (`hashlength`, `saltlength`, `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`) differ from current options values
+  * `options` (object, optional): Options to add or modify, which may include:
+    * `hashlength` (int, default 32): Hash length in bytes.
+    * `saltlength` (int, default 16): Salt length in bytes.
+    * `pepper` (string, optional): A secret to increase security, default is an empty string (no pepper used).
+    * Any `crypto.scrypt()` option: `cost`|`N`, `blockSize`|`r`, `parallelization`|`p`, `maxmem`.
+    * `strict` (boolean, default false): Enforces strict matching of hashing parameters during verification.
 
-**Returns:** an object containing the resulting scrypt options
+**Returns:** The resulting scrypt options.
 
 ### `hash(password [, options])`
-
-computes a salted hashed password
+Generate a salted hash of a password.
 
 **Parameters:**
-  * `password` (string)
-  * `options` (JSON object): to override any option
+
+  * `password` (string): The password to hash.
+  * `options` (object, optional): Overrides for current options.
 
 **Returns:** a PHC-formatted string
 
 ### `verify(password, hash [, options])`
 
-checks if a password matches with a salted hash
+Verify if a password matches a salted hash.
 
 **Parameters:**
-  * `password` (string)
-  * `hash` (string): the PHC-formatted salted hash as returned by `hash`
-  * `options` (JSON object): to override any options
 
-**Returns:** a boolean, false if the password does not match the hash or if the hash is in a wrong format
+  * password (string): The password to verify.
+  * hash (string): The PHC-formatted salted hash to compare against.
+  * options (object, optional): Overrides for current options.
+
+**Returns:** true if the password matches the hash, otherwise false.
 
 ### `needsRehash(hash [, options])`
 
-checks if a hash is compliant to the format returned by `hash()` toward scrypt options: if not, it should be re-hashed
+Check if a hash is compliant to the format returned by `hash()` toward scrypt options: if not, it should be rehashed.
 
 **Parameters:**
-  * `hash` (string): the salted hash to check
-  * `options` (JSON object): to override any option
 
-**Returns:** a boolean, `false` if the hash seems to be compliant, `true` if it needs to be re-hashed
+  * hash (string): The salted hash to check.
+  * options (object, optional): Overrides for current options.
 
-### `parse(hash, [options])`
-Parses a salted hash and, if 'strict' option is set, checks if it is compliant with scrypt options.
+**Returns:** true if the hash needs rehashing, false otherwise.
+
+### `parse(hash, [options])`
+Parse and validate a salted hash against current or provided options.
 
 **Parameters:**
-* hash (string): The salted hash to parse.
-* options (JSON object): to override any option.
 
-**Returns:** An object containing the following fields:
-* hashedPassword (Buffer): The base64-decoded hashed password.
-* salt (Buffer): The base64-decoded salt.
-* cost (int): The cost factor (N).
-* blockSize (int): The block size (r).
-* parallelization (int): The parallelization factor (p).
+  * hash (string): The salted hash to parse.
+  * options (object, optional): Overrides for current options.
 
-Throws: An error if the hash format is invalid or the hash fails validation.
+**Returns:** An object containing:
+  * hashedPassword (Buffer): The base64-decoded hashed password.
+  * salt (Buffer): The base64-decoded salt.
+  * cost (int): Cost factor (N).
+  * blockSize (int): Block size (r).
+  * parallelization (int): Parallelization factor (p).
 
+Throws: An error if the hash format is invalid or (if `strict` option is set to true) fails validation.
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+Contributions are welcome! Please submit issues or pull requests for bug fixes or new features.
