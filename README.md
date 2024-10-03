@@ -1,6 +1,6 @@
-# scrypt-password
+# scrypt-pwd
 
-`scrypt-password` is a simple yet powerful password hashing and verification library that wraps around the native `crypto.scrypt` implementation.
+`scrypt-pwd` is a simple yet powerful password hashing and verification library that wraps around the native `crypto.scrypt` implementation.
 
 ## 🌟 Features
 
@@ -12,7 +12,7 @@
 
 ## Usage
 ```js
-const { opts, hash, verify, needsRehash, parse } = require('scrypt-password');
+const { opts, hash, verify, needsRehash, parse } = require('scrypt-pwd');
 
 const password = 'supersecret';
 

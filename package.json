@@ -1,7 +1,7 @@
 {
-  "name": "scrypt-password",
+  "name": "scrypt-pwd",
   "version": "1.0.0",
-  "description": "Utilities for hashing passwords with scrypt in Node.js",
+  "description": "password hashing and verification using js-native scrypt",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
