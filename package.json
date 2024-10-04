@@ -1,10 +1,18 @@
 {
   "name": "scrypt-pwd",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "password hashing and verification using js-native scrypt",
   "main": "index.js",
+  "homepage": "https://github.com/Horanet/node-scrypt-pwd",
   "scripts": {
     "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Horanet/node-scrypt-pwd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Horanet/node-scrypt-pwd/issues"
   },
   "keywords": [
     "scrypt",
@@ -16,7 +24,7 @@
     "check",
     "PHC"
   ],
-  "author": "fxdeltombe (https://github.com/fxdeltombe)",
+  "author": "Horanet (https://www.horanet.com)",
   "license": "MIT",
   "dependencies": {
     "@phc/format": "^1.0.0"
